@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12372d">
+  <meta name="description" content="Toán Lab 3D — 147 bài toán thực tế THPT có mô phỏng, lời giải và tự luyện.">
+  <title>Toán Lab 3D</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="brand" href="#bai-2"><span class="brand-mark" aria-hidden="true"></span> Toán Lab <b>3D</b></a>
+      <nav aria-label="Điều hướng"><a id="browse-link" href="#thu-vien">Thư viện</a><a id="lesson-link" href="#bai-2">Bài học</a><a id="formula-link" href="#cong-thuc">Kho công thức</a><a id="study-link" href="#on-tap">Tiến độ</a></nav>
+    </div>
+  </header>
+  <main id="main">
+    <div id="lesson-page">
+      <div class="bread"><a href="#thu-vien">Thư viện</a><span aria-hidden="true">/</span> <a id="group"></a></div>
+      <header class="title-row"><div><h1 id="title"></h1><p id="tag"></p></div><span id="number" class="lesson-number"></span></header>
+      <div class="lab-grid">
+        <section class="lab" id="lab" aria-label="Mô phỏng">
+          <div class="prob-lab-bar" id="prob-lab-bar" hidden>
+            <nav aria-label="Chế độ phòng thí nghiệm">
+              <button type="button" data-lab-view="model" aria-pressed="true">Thí nghiệm 3D</button>
+              <button type="button" data-lab-view="results" aria-pressed="false" id="prob-results-tab">Kết quả</button>
+              <button type="button" data-lab-view="compare" aria-pressed="false">So sánh A/B</button>
+              <button type="button" data-lab-view="quan" id="quan-game-tab" aria-pressed="false" hidden>Chơi ô ăn quan</button>
+            </nav>
+            <span id="prob-lab-status" class="prob-lab-status" role="status"></span>
+          </div>
+          <section id="quan-game" class="quan-game" aria-label="Bàn chơi ô ăn quan" hidden>
+            <div class="quan-scores"><output></output><output></output><span data-quan-hand hidden></span></div>
+            <canvas role="img" aria-label="Bàn ô ăn quan"></canvas>
+            <div class="quan-controls">
+              <p role="status"></p>
+              <div class="quan-pit-buttons" role="group" aria-label="Chọn ô dân"></div>
+              <div class="quan-options">
+                <button type="button" class="outline" data-quan-direction="-1">Rải theo chiều kim đồng hồ</button>
+                <button type="button" class="primary" data-quan-direction="1">Rải ngược chiều kim đồng hồ</button>
+                <label>Tốc độ <select aria-label="Tốc độ rải quân"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+                <button type="button" class="outline" data-quan-reset>Ván mới</button>
+              </div>
+              <details><summary>Luật bàn chơi</summary>
+                <p>Hai người lần lượt chọn ô dân thuộc hàng mình. Mỗi ô dân bắt đầu với 5 quân, mỗi đầu có 1 quan trị giá 10 điểm. Rải từng quân vào ô kế tiếp, kể cả ô quan.</p>
+                <p>Rải hết thì bốc tiếp nếu ô kế là ô dân có quân. Qua đúng một ô trống thì ăn toàn bộ quân trong ô sau đó. Có thể ăn liên tiếp nếu lặp lại cách một ô trống. Gặp ô quan có quân ngay sau chỗ dừng, hoặc gặp hai ô trống, thì đổi lượt.</p>
+                <p>Hàng trống được bày lại bằng quân dân đã ăn hoặc vay và ghi nợ. Nếu thiếu quân để bày, nhường lượt cho bên còn quân. Ván kết thúc khi hai quan bị ăn hoặc hai bên đều hết nước. Quân dân còn lại thuộc về người giữ hàng đó.</p>
+              </details>
+            </div>
+          </section>
+          <div id="model-panel" class="model-panel">
+          <div class="viewport">
+            <div class="studio-scene-heading" id="studio-scene-heading" hidden>
+              <div class="stage-title"><span id="studio-stage-label"></span><span id="studio-camera-label"></span></div>
+              <div class="stage-display">
+                <output id="stage-zoom" aria-label="Mức thu phóng"></output>
+                <button type="button" id="stage-full" class="stage-icon" title="Mở chế độ tập trung" aria-label="Mở chế độ tập trung">⛶</button>
+                <button type="button" id="stage-close" class="stage-icon" title="Đóng chế độ tập trung" aria-label="Đóng chế độ tập trung" hidden>×</button>
+              </div>
+            </div>
+            <div class="viewport-bar">
+              <div class="view-switch" aria-label="Chế độ xem"><button type="button" id="scene-btn" aria-pressed="true">Mô hình 3D</button><button type="button" id="graph-btn" aria-pressed="false">Đồ thị</button></div>
+              <div class="view-switch" id="orbit" aria-label="Điều khiển góc nhìn">
+                <button type="button" data-turn="-1" aria-label="Xoay sang trái" title="Xoay sang trái">↶</button>
+                <button type="button" data-turn="1" aria-label="Xoay sang phải" title="Xoay sang phải">↷</button>
+                <button type="button" data-zoom="1" aria-label="Phóng to" title="Phóng to">+</button>
+                <button type="button" data-zoom="-1" aria-label="Thu nhỏ" title="Thu nhỏ">−</button>
+                <button type="button" id="top-view" aria-pressed="false" aria-label="Nhìn từ trên xuống" title="Nhìn từ trên xuống">⊞</button>
+                <button type="button" id="reset-view" aria-label="Đặt lại góc nhìn" title="Đặt lại góc nhìn">⌂</button>
+              </div>
+            </div>
+            <div id="stage-surface" class="stage-surface" data-tool="orbit">
+              <canvas id="scene" role="img" aria-label="Mô hình bài học"></canvas>
+              <button type="button" id="stage-handle" class="stage-handle" role="slider" aria-label="Thông số mô hình" hidden><span aria-hidden="true">↔</span></button>
+            </div>
+            <div class="studio-view-tools" id="studio-view-tools">
+              <div class="stage-tools" id="stage-tools" aria-label="Thao tác trực tiếp trên mô hình">
+                <button type="button" class="outline" data-stage-tool="orbit" aria-pressed="true">Xoay</button>
+                <button type="button" class="outline" data-stage-tool="pan" aria-pressed="false">Dịch khung</button>
+                <button type="button" class="outline" data-stage-tool="parameter" aria-pressed="false">Kéo thông số</button>
+              </div>
+              <button type="button" class="outline" id="stage-fit">Căn hình</button>
+              <label for="studio-camera">Góc nhìn <select id="studio-camera">
+                <option value="perspective">Phối cảnh</option><option value="front">Chính diện</option><option value="side">Nhìn ngang</option><option value="top">Từ trên</option><option value="custom" disabled>Tự chỉnh</option>
+              </select></label>
+              <button type="button" class="outline" id="studio-fill" aria-pressed="false" hidden>Tô thể tích</button>
+              <button type="button" class="outline" id="studio-cutaway" aria-pressed="false" hidden>Mở nửa vỏ</button>
+              <button type="button" class="outline" id="studio-projection" aria-pressed="false" hidden>Hình chiếu xOy</button>
+              <button type="button" class="outline" id="studio-image">Lưu ảnh PNG</button>
+              <div class="stage-reading" id="stage-reading" hidden>
+                <span id="stage-reading-label"></span>
+                <output id="stage-reading-value"></output>
+              </div>
+              <div class="stage-hint" id="stage-hint" hidden>
+                <span id="stage-hint-text"></span>
+                <label id="stage-variable-label" for="stage-variable">Thông số <select id="stage-variable"></select></label>
+                <output id="stage-param-value"></output>
+              </div>
+            </div>
+            <div class="studio-graph-tools" id="studio-graph-tools" hidden>
+              <label for="studio-metric">Đại lượng <select id="studio-metric"></select></label>
+              <span id="studio-graph-key"></span>
+            </div>
+          </div>
+          <div class="studio-playback" id="studio-playback" aria-label="Điều khiển hoạt ảnh" hidden>
+            <div class="studio-motion-controls">
+                <button type="button" class="primary" id="studio-play">Phát biến thiên</button>
+                <label for="studio-variable" id="studio-variable-label">Thông số <select id="studio-variable"></select></label>
+                <label for="studio-speed">Tốc độ <select id="studio-speed"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label>
+                <button type="button" id="studio-direction" class="outline" aria-label="Đổi hướng phát">Tăng dần</button>
+                <button type="button" id="studio-loop" class="outline" aria-pressed="false">Lặp hai chiều</button>
+            </div>
+            <div class="studio-timeline">
+              <label id="studio-timeline-label" for="studio-scrub">Vị trí</label>
+              <input type="range" id="studio-scrub" aria-labelledby="studio-timeline-label">
+              <output id="studio-timeline-value" for="studio-scrub"></output>
+            </div>
+          </div>
+          <div id="mechanism-controls" class="studio-timeline mechanism-controls" hidden>
+            <button type="button" class="outline" id="mechanism-play"></button>
+            <label id="mechanism-label" for="mechanism-position"></label>
+            <input type="range" id="mechanism-position" min="0" max="100" step="1">
+            <output id="mechanism-value" for="mechanism-position"></output>
+          </div>
+          <div id="prob-actions-slot" class="prob-actions-slot"></div>
+          <div class="replay-controls" id="replay-controls" aria-label="Phát lại mô phỏng" hidden>
+            <div class="replay-head">
+              <strong id="replay-step">Bước 0 / 0</strong>
+              <span id="replay-description" role="status"></span>
+            </div>
+            <div class="replay-actions">
+              <button type="button" class="outline" id="replay-back">Lùi</button>
+              <button type="button" class="primary" id="replay-play">Phát lại</button>
+              <button type="button" class="outline" id="replay-next">Tiến</button>
+              <label class="replay-scrub" for="replay-range">
+                <span>Mốc xem</span><input type="range" id="replay-range" min="0" max="0" value="0" step="1">
+              </label>
+              <label class="replay-speed" for="replay-speed">Tốc độ
+                <select id="replay-speed"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+              </label>
+            </div>
+          </div>
+          <div id="prob-trace-area" class="prob-trace-area" hidden>
+            <h3 id="prob-trace-title">Diễn biến lượt vừa thử</h3>
+            <ol id="prob-trace"></ol>
+          </div>
+          <div class="walk-panel" id="walk-panel" hidden>
+            <div class="walk-head">
+              <strong id="walk-stage" role="status" tabindex="-1"></strong>
+              <div class="walk-switches">
+                <button class="outline" id="walk-heat" type="button" aria-pressed="true">Hiện số đường</button>
+                <button class="outline" id="walk-hint" type="button" aria-pressed="false" hidden>Gợi ý tới đích</button>
+              </div>
+            </div>
+            <p id="walk-status" role="status"></p>
+            <div id="walk-choices" aria-label="Điểm đến hợp lệ"></div>
+          </div>
+          <div class="scene-notes" id="scene-notes" hidden>
+            <div class="scene-note-bar">
+              <span id="drag-hint">Kéo hình để xoay</span>
+              <button type="button" id="toggle-labels" class="outline" aria-expanded="true" aria-controls="scene-labels">Ẩn chú thích</button>
+            </div>
+            <div class="scene-labels" id="scene-labels">
+              <span id="scene-caption"></span>
+              <ul id="scene-label-list" aria-label="Chú thích mô hình"></ul>
+            </div>
+          </div>
+          </div>
+          <div class="controls" id="prob-setup">
+            <div id="prob-setup-header" class="prob-setup-header" hidden>
+              <h2>Thông số mô phỏng</h2>
+              <button id="prob-defaults" type="button" class="outline">Về thông số đề bài</button>
+            </div>
+            <div id="sliders"></div>
+            <section class="studio-motion" id="studio-motion" aria-label="Phát mô phỏng theo thông số" hidden>
+              <div class="studio-motion-controls">
+                <div class="studio-jumps" id="studio-jumps" aria-label="Các mốc thông số">
+                  <button type="button" data-jump-value="min">Nhỏ nhất</button>
+                  <button type="button" data-jump-value="value">Giá trị đề</button>
+                  <button type="button" data-jump-value="max">Lớn nhất</button>
+                </div>
+              </div>
+              <p id="studio-motion-info"></p>
+              <div class="studio-reference">
+                <button type="button" class="outline" id="studio-baseline">Đánh dấu mốc A</button>
+                <button type="button" class="outline" id="studio-clear-baseline" hidden>Xóa A</button>
+                <p id="studio-baseline-info" hidden></p>
+              </div>
+            </section>
+            <div id="sample-default-slot"></div>
+            <div class="sample-action" id="sample-action" hidden>
+              <button type="button" class="outline" id="sample-btn">Thử 1 lần</button>
+              <button type="button" class="outline" id="guided-btn" hidden>Thử từng bước</button>
+              <button type="button" class="outline" id="batch-btn">Thử 100 lần</button>
+              <button type="button" class="outline" id="large-batch-btn">Thử 1.000 lần</button>
+              <button type="button" class="outline" id="walk-manual" hidden>Tự đi từng bước</button>
+              <button type="button" class="outline" id="sample-reset" hidden>Đặt lại lượt thử</button>
+              <button type="button" class="prob-summary-link" id="prob-summary-link" hidden>Xem kết quả</button>
+              <p id="sample-note" aria-live="polite"></p>
+            </div>
+            <dl id="metrics" class="metrics" aria-live="polite"></dl>
+            <section id="section-lab" class="section-lab" hidden aria-labelledby="section-title">
+              <div class="section-summary"><div><h3 id="section-title">Diện tích theo lát cắt</h3><p id="section-formula"></p></div><output id="section-area"></output></div>
+              <label for="section-position" id="section-axis">Vị trí lát cắt</label>
+              <input id="section-position" type="range" aria-labelledby="section-axis">
+              <canvas id="section-chart" role="img"></canvas>
+            </section>
+            <div id="coordinate-readings" class="coordinate-readings" hidden>
+              <h3>Tọa độ và hình chiếu trên xOy</h3><ul id="coordinate-points"></ul>
+            </div>
+          </div>
+          <section class="prob-workspace" id="prob-results" aria-labelledby="prob-title" hidden>
+            <div class="prob-report" id="prob-report">
+              <div class="prob-report-heading">
+                <h2 id="prob-title">Thí nghiệm xác suất</h2>
+                <div class="prob-results-actions">
+                  <span id="prob-verdict" hidden></span>
+                  <button type="button" id="prob-replay-link" class="outline" hidden>Xem lượt cuối</button>
+                </div>
+              </div>
+              <p id="prob-event"></p>
+              <p id="prob-empty" class="prob-empty" hidden>Chạy một lượt thử để đối chiếu với xác suất lý thuyết.</p>
+              <dl id="prob-compare" class="prob-compare" hidden></dl>
+              <details class="prob-distribution" id="prob-distribution" hidden>
+                <summary>Phân bố kết quả</summary>
+                <div class="prob-scope" id="prob-scope" hidden aria-label="Mẫu dùng để tính tần suất">
+                  <button class="outline" type="button" data-scope="all" aria-pressed="true">Tất cả lượt</button>
+                  <button class="outline" type="button" data-scope="qualified" aria-pressed="false" id="prob-qualified">Thỏa điều kiện</button>
+                </div>
+                <p class="prob-key"><span>● Thực nghiệm</span><span>│ Lý thuyết</span></p>
+                <div id="prob-bars"></div>
+                <p id="prob-distribution-note"></p>
+              </details>
+              <div id="walk-map" class="walk-map" hidden>
+                <label for="walk-map-range">Số bước <output id="walk-map-step" for="walk-map-range"></output></label>
+                <input type="range" id="walk-map-range" min="0" value="0" step="1">
+                <div id="walk-map-cells" class="walk-map-cells" aria-label="Chọn vị trí để xem cách đếm"></div>
+                <p id="walk-map-equation" class="walk-map-equation" role="status"></p>
+              </div>
+            </div>
+          </section>
+          <section class="prob-workspace" id="prob-ab" aria-labelledby="prob-ab-title" hidden>
+            <h2 id="prob-ab-title">So sánh hai cấu hình</h2>
+            <p id="prob-ab-help">Lưu cấu hình A, rồi đổi thông số để đối chiếu với cấu hình B hiện tại.</p>
+            <div id="prob-ab-cards" class="prob-ab-cards"></div>
+            <p id="prob-ab-delta" class="prob-ab-delta" role="status"></p>
+            <div class="prob-ab-actions">
+              <button type="button" id="prob-ab-save" class="primary">Lưu cấu hình A</button>
+              <button type="button" id="prob-ab-load" class="outline" hidden>Áp dụng thông số A</button>
+              <button type="button" id="prob-ab-clear" class="outline" hidden>Xóa A</button>
+            </div>
+          </section>
+        </section>
+        <section class="lesson" aria-label="Nội dung bài học">
+          <nav id="tabs" class="tabs" aria-label="Các phần bài học">
+            <button type="button" data-tab="problem" aria-pressed="true" aria-controls="content">Đề bài</button>
+            <button type="button" data-tab="formula" aria-pressed="false" aria-controls="content">Công thức</button>
+            <button type="button" data-tab="solution" aria-pressed="false" aria-controls="content">Lời giải</button>
+            <button type="button" data-tab="practice" aria-pressed="false" aria-controls="content">Tự giải</button>
+          </nav>
+          <div class="problem-toolbar"><span id="problem-status">Đề mẫu</span><button class="outline" type="button" id="edit-problem">Soạn đề</button></div>
+          <div id="content" class="content"></div>
+        </section>
+      </div>
+      <dialog id="stage-focus" class="stage-focus" aria-label="Chế độ tập trung mô phỏng Toán Lab 3D"></dialog>
+      <nav class="lesson-nav" aria-label="Chuyển bài"><a id="prev"></a><a id="next"></a></nav>
+    </div>
+    <section id="study-page" hidden>
+      <header class="title-row"><div><h1>Tiến độ và câu sai</h1><p id="study-counts" role="status"></p></div><a class="primary" id="study-resume" hidden>Tiếp tục câu gần nhất →</a></header>
+      <div id="study-switch" class="practice-picker" aria-label="Lọc tiến độ">
+        <button type="button" class="outline" aria-pressed="true" data-study-view="mistakes">Câu từng làm sai</button>
+        <button type="button" class="outline" aria-pressed="false" data-study-view="all">Tất cả câu đã làm</button>
+      </div>
+      <div id="study-list"></div>
+    </section>
+    <section id="formula-page" hidden>
+      <header class="title-row"><div><h1>Kho công thức</h1><p>Tra cứu theo chuyên đề, dạng toán hoặc tên công thức.</p></div></header>
+      <div class="formula-tools">
+        <label>Tìm công thức <input type="search" id="formula-search" placeholder="Ví dụ: Bayes, thể tích, mặt cầu…" autocomplete="off"></label>
+        <label>Chuyên đề <select id="formula-chapter"></select></label>
+        <label>Dạng bài <select id="formula-type"></select></label>
+      </div>
+      <p id="formula-count" role="status"></p>
+      <div id="formula-results"></div>
+    </section>
+    <dialog id="problem-dialog" class="problem-dialog" aria-labelledby="problem-title">
+      <form id="problem-form" novalidate>
+        <div class="editor-heading"><div><h2 id="problem-title">Soạn đề</h2><p id="problem-lesson"></p></div><button id="editor-close" type="button" class="outline" aria-label="Đóng phần soạn đề">×</button></div>
+        <div class="editor-body">
+          <p>Nhập số liệu vào ô bên dưới. Bài học mở với bộ số liệu bạn chọn, sau đó bạn có thể tiếp tục thử các giá trị trong mô phỏng.</p>
+          <div id="problem-fields"></div>
+          <label class="editor-field" for="problem-metric">Đại lượng cần tìm<select id="problem-metric"></select></label>
+          <p id="problem-errors" class="editor-errors" role="alert" hidden></p>
+          <div class="editor-preview"><strong>Xem trước</strong><p id="problem-draft-preview" aria-live="polite"></p></div>
+        </div>
+        <div class="editor-actions"><button id="editor-reset" type="button" class="outline">Khôi phục đề mẫu</button><button class="primary" type="submit">Áp dụng đề</button></div>
+      </form>
+    </dialog>
+    <section id="library-page" hidden>
+      <div class="bread"><a href="#bai-2">Bài học</a> <span aria-hidden="true">/</span> Thư viện</div>
+      <header class="title-row"><div><h1>Thư viện Toán thực tế</h1><p>147 bài trong 5 chuyên đề · 24 bài chính và 123 bài mở rộng</p></div></header>
+      <div class="search-row">
+        <label for="lesson-search">Tìm bài toán</label>
+        <input id="lesson-search" type="search" placeholder="Ví dụ: Thang tựa tường, Oxyz, 30…" autocomplete="off">
+        <span id="search-count" role="status"></span>
+      </div>
+      <div class="library-tools">
+        <div class="filters" id="filters" aria-label="Lọc chuyên đề"></div>
+        <label for="collection">Loại bài <select id="collection"><option value="all">Tất cả 147 bài</option><option value="main">24 bài chính</option><option value="extra">123 bài mở rộng</option><option value="new">56 bài mới</option></select></label>
+      </div>
+      <div id="library-list"></div>
+    </section>
+  </main>
+  <noscript>Hãy bật JavaScript để dùng mô phỏng Toán Lab 3D.</noscript>
+</body>
+</html>
